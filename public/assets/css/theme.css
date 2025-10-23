@@ -1,0 +1,40 @@
+:root {
+    --primary-color: #2E5EAA;
+    --secondary-color: #5D8233;
+    --accent-color: #D4AF37;
+    --light-color: #F5F5F5;
+}
+
+body[data-theme="dark"], html[data-theme="dark"] body {
+    background-color: #121212;
+    color: #F5F5F5;
+}
+
+.navbar-dark .navbar-nav .nav-link.active,
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: var(--accent-color);
+}
+
+.card-highlight {
+    border-left: 4px solid var(--accent-color);
+}
+
+.fixed-mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--primary-color);
+    color: #fff;
+    display: flex;
+    justify-content: space-around;
+    padding: 0.5rem 0;
+    z-index: 1030;
+}
+
+.fixed-mobile-nav a {
+    color: #fff;
+    text-align: center;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
