@@ -1,0 +1,53 @@
+#!/usr/bin/env php
+<?php
+require __DIR__ . '/../../tests/bootstrap.php';
+
+use PHPUnit\Framework\TestCase;
+
+$iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__DIR__ . '/../../tests'));
+$testFiles = [];
+foreach ($iterator as $file) {
+    if ($file->isFile() && str_ends_with($file->getFilename(), 'Test.php')) {
+        $testFiles[] = $file->getPathname();
+    }
+}
+$results = [];
+$total = 0;
+$failed = 0;
+
+foreach ($testFiles as $file) {
+    require_once $file;
+}
+
+foreach (get_declared_classes() as $class) {
+    if (is_subclass_of($class, TestCase::class)) {
+        $ref = new ReflectionClass($class);
+        if ($ref->isAbstract()) {
+            continue;
+        }
+        $instance = $ref->newInstance();
+        foreach ($ref->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+            if (str_starts_with($method->getName(), 'test')) {
+                $total++;
+                try {
+                    $instance->runTest($method->getName());
+                    $results[] = ['status' => 'ok', 'class' => $class, 'method' => $method->getName()];
+                } catch (Throwable $e) {
+                    $failed++;
+                    $results[] = ['status' => 'fail', 'class' => $class, 'method' => $method->getName(), 'message' => $e->getMessage()];
+                }
+            }
+        }
+    }
+}
+
+foreach ($results as $result) {
+    if ($result['status'] === 'ok') {
+        echo "✔ {$result['class']}::{$result['method']}\n";
+    } else {
+        echo "✘ {$result['class']}::{$result['method']} - {$result['message']}\n";
+    }
+}
+
+echo "Tests: {$total}, Failures: {$failed}\n";
+exit($failed ? 1 : 0);

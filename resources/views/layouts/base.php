@@ -77,7 +77,12 @@
                     </div>
                 </li>
                 <li class="nav-item"><a class="nav-link" href="/chat">Chat</a></li>
-                <li class="nav-item"><a class="nav-link" href="/login">Entrar</a></li>
+                <li class="nav-item"><a class="nav-link" href="/notificacoes">Notificações</a></li>
+                <?php if (!empty($_SESSION['auth_user_id'])): ?>
+                    <li class="nav-item"><a class="nav-link" href="/logout">Sair</a></li>
+                <?php else: ?>
+                    <li class="nav-item"><a class="nav-link" href="/login">Entrar</a></li>
+                <?php endif; ?>
             </ul>
         </div>
     </div>

@@ -23,7 +23,8 @@ class AuthManager
             return false;
         }
 
-        $_SESSION[self::SESSION_KEY] = $user['id'];
+        $this->loginUsingId((int) $user['id']);
+        $this->syncContext($user);
         return true;
     }
 
@@ -45,5 +46,22 @@ class AuthManager
     public function logout(): void
     {
         unset($_SESSION[self::SESSION_KEY]);
+        unset($_SESSION['church_id']);
+    }
+
+    public function loginUsingId(int $userId): void
+    {
+        $_SESSION[self::SESSION_KEY] = $userId;
+        $user = $this->userModel->find($userId);
+        if ($user) {
+            $this->syncContext($user);
+        }
+    }
+
+    private function syncContext(array $user): void
+    {
+        if (!empty($user['church_id'])) {
+            $_SESSION['church_id'] = (int) $user['church_id'];
+        }
     }
 }

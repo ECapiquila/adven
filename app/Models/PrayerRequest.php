@@ -16,12 +16,8 @@ class PrayerRequest extends Model
         return $stmt->fetchAll();
     }
 
-    public function create(array $data): int
+    public function createRequest(array $data): int
     {
-        $sql = "INSERT INTO {$this->table} (author_id, scope_type, scope_id, title, category, body, privacy, status, created_at, updated_at)
-                VALUES (:author_id, :scope_type, :scope_id, :title, :category, :body, :privacy, :status, NOW(), NOW())";
-        $stmt = $this->pdo()->prepare($sql);
-        $stmt->execute($data);
-        return (int) $this->pdo()->lastInsertId();
+        return $this->create($data);
     }
 }

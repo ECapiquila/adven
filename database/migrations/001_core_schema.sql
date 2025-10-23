@@ -1,0 +1,244 @@
+CREATE TABLE IF NOT EXISTS regions (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    type VARCHAR(30) DEFAULT 'region',
+    parent_id INT UNSIGNED NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS districts (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    region_id INT UNSIGNED NOT NULL,
+    name VARCHAR(150) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (region_id) REFERENCES regions(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS churches (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    district_id INT UNSIGNED NOT NULL,
+    name VARCHAR(150) NOT NULL,
+    address VARCHAR(190) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (district_id) REFERENCES districts(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS users (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(120) NOT NULL,
+    email VARCHAR(120) UNIQUE,
+    phone VARCHAR(40) UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(40) DEFAULT 'membro',
+    is_adventist TINYINT(1) DEFAULT 0,
+    gender VARCHAR(20) NULL,
+    country VARCHAR(80) DEFAULT 'Angola',
+    province VARCHAR(80) NULL,
+    municipio VARCHAR(80) NULL,
+    bairro VARCHAR(120) NULL,
+    region_id INT UNSIGNED NULL,
+    district_id INT UNSIGNED NULL,
+    church_id INT UNSIGNED NULL,
+    points INT DEFAULT 0,
+    remember_token VARCHAR(120) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (region_id) REFERENCES regions(id),
+    FOREIGN KEY (district_id) REFERENCES districts(id),
+    FOREIGN KEY (church_id) REFERENCES churches(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS church_roles (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(120) NOT NULL,
+    hierarchy_level INT NOT NULL,
+    scope VARCHAR(30) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY idx_church_roles_name (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS church_role_assignments (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+    role_id INT UNSIGNED NOT NULL,
+    assigned_by INT UNSIGNED NOT NULL,
+    association_id INT UNSIGNED NULL,
+    region_id INT UNSIGNED NULL,
+    district_id INT UNSIGNED NULL,
+    church_id INT UNSIGNED NULL,
+    revoked_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (role_id) REFERENCES church_roles(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+    action VARCHAR(160) NOT NULL,
+    target_type VARCHAR(120) NOT NULL,
+    target_id INT UNSIGNED NULL,
+    meta_json JSON NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS notifications (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+    type VARCHAR(120) NOT NULL,
+    data_json JSON NOT NULL,
+    read_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS queue_jobs (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    queue VARCHAR(80) NOT NULL,
+    job_type VARCHAR(120) NOT NULL,
+    payload_json JSON NOT NULL,
+    attempts INT DEFAULT 0,
+    available_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    reserved_at TIMESTAMP NULL,
+    completed_at TIMESTAMP NULL,
+    failed_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS chat_threads (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    subject VARCHAR(190) NULL,
+    is_group TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS chat_participants (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    thread_id INT UNSIGNED NOT NULL,
+    user_id INT UNSIGNED NOT NULL,
+    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (thread_id) REFERENCES chat_threads(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS chat_messages (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    thread_id INT UNSIGNED NOT NULL,
+    sender_id INT UNSIGNED NOT NULL,
+    body TEXT NOT NULL,
+    attachments_json JSON NULL,
+    delivered_at TIMESTAMP NULL,
+    seen_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (thread_id) REFERENCES chat_threads(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS prayer_requests (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    author_id INT UNSIGNED NOT NULL,
+    scope_type VARCHAR(30) DEFAULT 'church',
+    scope_id INT UNSIGNED NOT NULL,
+    title VARCHAR(160) NOT NULL,
+    category VARCHAR(30) DEFAULT 'outro',
+    body TEXT NOT NULL,
+    privacy VARCHAR(20) DEFAULT 'publico',
+    status VARCHAR(30) DEFAULT 'aberto',
+    forwarded_to_scope VARCHAR(30) NULL,
+    forwarded_by INT UNSIGNED NULL,
+    forwarded_reason VARCHAR(255) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (author_id) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS prayer_responses (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    prayer_id INT UNSIGNED NOT NULL,
+    responder_id INT UNSIGNED NOT NULL,
+    body TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (prayer_id) REFERENCES prayer_requests(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS prayer_reactions (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    prayer_id INT UNSIGNED NOT NULL,
+    user_id INT UNSIGNED NOT NULL,
+    type VARCHAR(20) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (prayer_id) REFERENCES prayer_requests(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS prayer_followers (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    prayer_id INT UNSIGNED NOT NULL,
+    user_id INT UNSIGNED NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (prayer_id) REFERENCES prayer_requests(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS health_posts (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    author_id INT UNSIGNED NOT NULL,
+    title VARCHAR(190) NOT NULL,
+    body_html TEXT,
+    category VARCHAR(30) DEFAULT 'nutricao',
+    media_path VARCHAR(255) NULL,
+    visibility VARCHAR(20) DEFAULT 'publico',
+    status VARCHAR(30) DEFAULT 'approved',
+    is_verified_author TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (author_id) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS family_threads (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    author_id INT UNSIGNED NOT NULL,
+    church_id INT UNSIGNED NOT NULL,
+    subject VARCHAR(180) NOT NULL,
+    body TEXT NOT NULL,
+    privacy VARCHAR(30) DEFAULT 'pastor_equipe',
+    status VARCHAR(30) DEFAULT 'aberto',
+    tags_json JSON NULL,
+    escalated_to VARCHAR(30) DEFAULT 'none',
+    escalated_by INT UNSIGNED NULL,
+    escalated_reason VARCHAR(255) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (church_id) REFERENCES churches(id),
+    FOREIGN KEY (author_id) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS family_messages (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    thread_id INT UNSIGNED NOT NULL,
+    sender_id INT UNSIGNED NOT NULL,
+    body TEXT NOT NULL,
+    attachments_json JSON NULL,
+    is_staff_note TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (thread_id) REFERENCES family_threads(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS family_staff (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    church_id INT UNSIGNED NOT NULL,
+    user_id INT UNSIGNED NOT NULL,
+    role VARCHAR(30) NOT NULL,
+    assigned_by INT UNSIGNED NOT NULL,
+    revoked_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (church_id) REFERENCES churches(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS user_points_log (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+    source VARCHAR(80) NOT NULL,
+    points INT NOT NULL,
+    meta_json JSON NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

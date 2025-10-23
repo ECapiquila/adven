@@ -14,7 +14,7 @@ class Connection
     {
         if ($this->pdo === null) {
             $config = Config::get('database');
-            $dsn = sprintf('mysql:host=%s;dbname=%s;charset=utf8mb4', $config['host'], $config['database']);
+            $driver = $config['driver'] ?? 'mysql';
             $options = [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -22,7 +22,23 @@ class Connection
             ];
 
             try {
-                $this->pdo = new PDO($dsn, $config['username'], $config['password'], $options);
+                if ($driver === 'sqlite') {
+                    $database = $config['database'] ?? ':memory:';
+                    $dsn = $database === ':memory:'
+                        ? 'sqlite::memory:'
+                        : 'sqlite:' . $database;
+                    $this->pdo = new PDO($dsn, null, null, $options);
+                } else {
+                    $charset = $config['charset'] ?? 'utf8mb4';
+                    $dsn = sprintf(
+                        'mysql:host=%s;port=%s;dbname=%s;charset=%s',
+                        $config['host'],
+                        $config['port'] ?? '3306',
+                        $config['database'],
+                        $charset
+                    );
+                    $this->pdo = new PDO($dsn, $config['username'], $config['password'], $options);
+                }
             } catch (PDOException $e) {
                 throw new \RuntimeException('Database connection failed: ' . $e->getMessage());
             }

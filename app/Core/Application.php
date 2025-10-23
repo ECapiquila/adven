@@ -42,7 +42,9 @@ class Application
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        $_SESSION['church_id'] = $_SESSION['church_id'] ?? 1;
-        $_SESSION['auth_user_id'] = $_SESSION['auth_user_id'] ?? 1;
+
+        if (!isset($_SESSION['locale'])) {
+            $_SESSION['locale'] = Config::get('app.locale', 'pt_AO');
+        }
     }
 }
