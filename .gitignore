@@ -1,0 +1,6 @@
+/vendor/
+/storage/logs/
+/storage/cache/
+/storage/framework/sessions/
+.env
+.DS_Store

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Ícone Sabbath Connect - Embaixadores</title>
+  <desc id="desc">Emblema azul escuro com faixa azul clara e letras SC</desc>
+  <rect width="512" height="512" rx="72" fill="#0d47a1"/>
+  <path d="M64 120h384v88L256 360 64 208z" fill="#1976d2" opacity=".92"/>
+  <circle cx="256" cy="360" r="96" fill="#ff7043" opacity=".85"/>
+  <text x="50%" y="56%" font-family="'Nunito', 'Segoe UI', sans-serif" font-size="176" font-weight="700" text-anchor="middle" fill="#ffffff" letter-spacing="12">SC</text>
+</svg>

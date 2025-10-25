@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Ícone Sabbath Connect - Desbravadores</title>
+  <desc id="desc">Escudo azul com faixa dourada e letras SC</desc>
+  <rect width="512" height="512" rx="72" fill="#004884"/>
+  <path d="M64 352h384v40a72 72 0 0 1-72 72H136a72 72 0 0 1-72-72v-40z" fill="#f9a825" opacity=".95"/>
+  <path d="M128 160h256v80H128z" fill="#f4511e" opacity=".88"/>
+  <text x="50%" y="55%" font-family="'Nunito', 'Segoe UI', sans-serif" font-size="180" font-weight="700" text-anchor="middle" fill="#ffffff" letter-spacing="12">SC</text>
+</svg>
