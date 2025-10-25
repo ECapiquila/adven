@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Ícone Sabbath Connect - Jovens</title>
+  <desc id="desc">Símbolo roxo com anel violeta e letras SC</desc>
+  <rect width="512" height="512" rx="72" fill="#6a1b9a"/>
+  <circle cx="256" cy="256" r="184" fill="none" stroke="#9c27b0" stroke-width="64"/>
+  <path d="M128 384h256v32a64 64 0 0 1-64 64H192a64 64 0 0 1-64-64z" fill="#ff4081" opacity=".82"/>
+  <text x="50%" y="54%" font-family="'Nunito', 'Segoe UI', sans-serif" font-size="180" font-weight="700" text-anchor="middle" fill="#ffffff" letter-spacing="12">SC</text>
+</svg>
